@@ -1,8 +1,4 @@
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.Scanner;
 
 public class main {
@@ -23,6 +19,12 @@ public class main {
         System.out.println("Which one do you want to use?");
         choice = myScanner.nextLine();
         getTables(choice);
+        myConnection.close();
+        url = url + "databaseName=" + choice;
+        myConnection = DriverManager.getConnection(url, user, pass);
+        System.out.println("Which one do you want to use?");
+        choice = myScanner.nextLine();
+        getColumns(choice);
     }
 
     //Attempts a database login, returns true (successful) or false (unsuccessful)
@@ -57,6 +59,19 @@ public class main {
             ResultSet retrival = md.getTables(myDB, "dbo", "%", null);
             while (retrival.next()){
                 System.out.println(retrival.getString(3));
+            }
+        } catch (SQLException e) { throw new RuntimeException(e);}
+    }
+
+    //Gets columns of specified table
+    static void getColumns(String table) {
+        try {
+            Statement stmt = myConnection.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from " + table);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int count = rsmd.getColumnCount();
+            for(int i = 1; i<=count; i++) {
+                System.out.println(rsmd.getColumnName(i));
             }
         } catch (SQLException e) { throw new RuntimeException(e);}
     }

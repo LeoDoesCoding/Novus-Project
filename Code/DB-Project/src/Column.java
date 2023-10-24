@@ -3,8 +3,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Column<T> {
-    private String type;
-    private Map<Integer, T> entries  = new HashMap<Integer, T>();
+    private String type; //Data type
+    private Map<Integer, T> entries  = new HashMap<Integer, T>(); //Key = ID from Table
     private boolean isNew; //Dictates whether it is added to the database
 
     public Column(String type, boolean isNew) {
@@ -12,13 +12,9 @@ public class Column<T> {
         this.isNew = isNew;
     }
 
+    //Also used to edit an entry
     public void addEntry(int index, T value){
         entries.put(index, value);
-    }
-
-    //Edits singular entry value
-    public void editValue(int index, T newValue){
-        entries.put(index, newValue);
     }
 
     //Getters

@@ -26,6 +26,7 @@ public class Table<T> {
         columns.get("IDs").addEntry(columns.get("IDs").size()+1, null);
     }
 
+
     //Adding new entry (row + column intersection)
     public void newEntry(int ID, T value, String type, String columnName) {
         //Check row is stored. If not, create.
@@ -36,8 +37,9 @@ public class Table<T> {
         if (!columns.containsKey(columnName)) {
             addColumn(columnName, type, false);
         }
-        //Both row and column are available. Add entry.
-        columns.get("columnName").addEntry(ID, value);
+
+        //Both row and column are now available. Add entry.
+        columns.get(columnName).addEntry(ID, value);
     }
 }
 
