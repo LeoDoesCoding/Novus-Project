@@ -63,16 +63,28 @@ public class main {
         } catch (SQLException e) { throw new RuntimeException(e);}
     }
 
-    //Gets columns of specified table
+    //Gets columns of specified table.
     static void getColumns(String table) {
         try {
             Statement stmt = myConnection.createStatement();
             ResultSet rs = stmt.executeQuery("select * from " + table);
             ResultSetMetaData rsmd = rs.getMetaData();
             int count = rsmd.getColumnCount();
+            Table myTable = new Table();
+
+            //Adds each to the myTable object.
             for(int i = 1; i<=count; i++) {
-                System.out.println(rsmd.getColumnName(i));
+                myTable.addColumn(rsmd.getColumnName(i), rsmd.getColumnType(i), false);
             }
+
+            while (rs.next()) {
+                myTable.newRow(rs.getString(1));
+                for(int i = 2; i<=count; i++) {
+                    myTable.newEntry(rs.getString(1), rs.getString(i), rsmd.getColumnType(i), rsmd.getColumnName(i));
+                }
+                System.out.println(myTable.toString(rs.getString(1)) + "\n"); //Prints entries by the ID
+            }
+            System.out.println("End of list.");
         } catch (SQLException e) { throw new RuntimeException(e);}
     }
 }
