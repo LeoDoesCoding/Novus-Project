@@ -1,20 +1,28 @@
 import java.sql.*;
 import java.util.Scanner;
 
-public class main {
+public class DBtester {
     static protected Connection myConnection;
 
     public static void main(String[] args) throws SQLException {
 
-        Scanner myScanner = new Scanner(System.in);
-        String choice;
+
         String url = "jdbc:sqlserver://localhost;";
         String user = "SA";
         String pass = "abc";
 
+
+        //consoleDance(url, user, pass);
+
         if(loginAttempt(url, user, pass)){
             myConnection = DriverManager.getConnection(url, user, pass);
         }
+    }
+
+    //For testing connection and retrival (console. Not run in actual application)
+    public static void consoleDance(String url, String user, String pass) throws SQLException {
+        Scanner myScanner = new Scanner(System.in);
+        String choice;
         getDatabases();
         System.out.println("Which one do you want to use?");
         choice = myScanner.nextLine();
@@ -26,6 +34,7 @@ public class main {
         choice = myScanner.nextLine();
         getColumns(choice);
     }
+
 
     //Attempts a database login, returns true (successful) or false (unsuccessful)
     //If true, a connection should be established to static, and the next scene loaded.
