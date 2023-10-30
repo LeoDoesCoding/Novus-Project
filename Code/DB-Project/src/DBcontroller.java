@@ -1,7 +1,11 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
+import javafx.util.Pair;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 //Manages the SQL connection and ferries queries
 public class DBcontroller {
@@ -30,17 +34,36 @@ public class DBcontroller {
         }
     }
 
-    public static ObservableList<String> getTable() throws SQLException {
+    //Gets table columns
+    public static ObservableList<String> getColumns() throws SQLException {
         ObservableList<String> data = FXCollections.observableArrayList();
 
         try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM Movies WHERE 1 = 0").executeQuery()) {
+            DataHandler.newDatabase(result.getMetaData().getColumnCount()); //Set empty table list
             for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
                 data.add(result.getMetaData().getColumnName(i));
             }
-            System.out.println(data);
         }
         return data;
     }
+
+    public static ObservableList getEntries() throws SQLException {
+        ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM Movies").executeQuery()) {
+            while (result.next()) {
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
+                    row.add(result.getString(i));
+                }
+                data.add(row);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return data;
+    }
+
 
     //Gets table for opened database
     static void getTables(String myDB) throws SQLException {
@@ -64,6 +87,7 @@ public class DBcontroller {
 
         } catch (SQLException e) { throw new RuntimeException(e);}
     }
+
 }
 
 

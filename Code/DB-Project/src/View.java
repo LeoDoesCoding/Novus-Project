@@ -28,7 +28,7 @@ public class View extends Application {
 
 
         //Table stuff
-        controller.getColumnNames();
+        controller.updateTableView();
 
 
         primaryStage.setScene(new Scene(root, 400, 300));

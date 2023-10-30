@@ -2,11 +2,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Column<T> {
+    private String name;
     private int type; //Data type
     private Map<Integer, T> entries  = new HashMap<Integer, T>(); //Key = ID from Table
     private boolean isNew; //Dictates whether it is added to the database
 
-    public Column(int type, boolean isNew) {
+    public Column(String name, int type, boolean isNew) {
+        this.name = name;
         this.type = type;
         this.isNew = isNew;
     }
@@ -29,4 +31,5 @@ public class Column<T> {
     }
     public int size(){ return entries.size();}
     public boolean containsKey (int ID) {return entries.containsKey(ID);}
+    public void setName(String name){this.name = name;}
 }

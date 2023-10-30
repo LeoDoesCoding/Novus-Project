@@ -3,19 +3,19 @@ import java.util.Map;
 
 //Manages a table
 public class Table<T> {
-    public Map<String, Column> columns  = new HashMap<String, Column>(); //list of columns (key = name, value = column object)
+    public Map<String, Column> columns  = new HashMap<String, Column>(); //list of columns (key = name (from database), value = column object)
     public Map<String, Integer> IDs = new HashMap<>(1);
 
     //ID hashmap: key = arbuitary value for operation, value = original database key to map onto database.
     //I guess display key can be a whole other column.
     public Table() {
-
     }
 
     //Creates a new column
     public void addColumn(String name, int type, boolean isNew) {
-        columns.put(name, new Column(type, isNew));
+        columns.put(name, new Column(name, type, isNew));
     }
+    public void setColumnName(String ID, String newName) { columns.get(ID).setName(newName);};
 
     //Creates a new index for a new row (database's row's current ID)
     public void newRow(String originID) {
@@ -52,6 +52,14 @@ public class Table<T> {
         String returnStr = IDs.get(ID).toString();
         for (String key : columns.keySet()) {
             returnStr = returnStr + "\n" + key + ": " + columns.get(key).getEntry(IDs.get(ID));
+        }
+        return returnStr;
+    }
+
+    public String toString(){
+        String returnStr ="";
+        for (String key : columns.keySet()) {
+            returnStr = returnStr + "\nColumn " + key;
         }
         return returnStr;
     }
