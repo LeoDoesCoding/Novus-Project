@@ -43,7 +43,7 @@
                             <content>
                                 <Pane prefHeight="292.0" prefWidth="640.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="10.0">
                                     <children>
-                                        <TableView fx:id="tableView" prefHeight="200.0" prefWidth="600.0">
+                                        <TableView fx:id="tableView" prefHeight="200.0" prefWidth="600.0" editable="true">
                                         </TableView>
                                         <Button text="New column" onAction="#addColumn"/>
                                     </children>

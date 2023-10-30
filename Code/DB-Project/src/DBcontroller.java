@@ -1,11 +1,7 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TableColumn;
-import javafx.util.Pair;
-
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
 //Manages the SQL connection and ferries queries
 public class DBcontroller {
@@ -45,6 +41,20 @@ public class DBcontroller {
             }
         }
         return data;
+    }
+
+    public static ArrayList<Integer> getColumnTypes() {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM Movies WHERE 1 = 0").executeQuery()) {
+
+            ArrayList<Integer> returnList = new ArrayList<Integer>();
+            DataHandler.newDatabase(result.getMetaData().getColumnCount()); //Set empty table list
+            for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
+                returnList.add(result.getMetaData().getColumnType(i));
+            }
+            return returnList;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static ObservableList getEntries() throws SQLException {

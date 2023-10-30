@@ -1,21 +1,16 @@
-import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 import javafx.util.converter.DefaultStringConverter;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.ArrayList;
 
 public class Controller {
     @FXML
@@ -29,12 +24,15 @@ public class Controller {
 
     @FXML
     private Button addColumnButt;
+    private ArrayList<Integer> columnDatas = new ArrayList<Integer>(); //columns data types
 
 
-    //Adds column to view
-    /*public void addColumn() {
-        TableColumn<ObservableList<StringProperty>, String> newColumn = new TableColumn<>("Column " + (tableView.getColumns().size() + 1));
-        newColumn.setCellValueFactory(param -> param.getValue().get(tableView.getColumns().indexOf(newColumn)));
+    //Adds new (blank) column
+    @FXML
+    private void addColumn() {
+        TableColumn<String, String> newColumn = new TableColumn<>("Column " + (tableView.getColumns().size() + 1));
+        newColumn.setId("col" + tableView.getColumns().size() + 1);
+        columnDatas.add(12); //Set data type to string
 
         newColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DefaultStringConverter()));
         newColumn.setEditable(true);
@@ -43,17 +41,11 @@ public class Controller {
         newColumn.setOnEditCommit(event -> {
             int row = event.getTablePosition().getRow();
             int col = tableView.getColumns().indexOf(newColumn);
-            tableView.getItems().get(row).get(col).set(event.getNewValue());
+            ObservableList<String> rowData = (ObservableList<String>) tableView.getItems().get(row);
+            rowData.set(col, event.getNewValue());
         });
 
-        tableView.getColumns().add(newColumn);
-    }*/
 
-    //Adds new (blank) column
-    @FXML
-    private void addColumn(ActionEvent event) {
-        TableColumn<String, String> newColumn = new TableColumn<>("Column " + (tableView.getColumns().size() + 1));
-        newColumn.setId("col" + tableView.getColumns().size() + 1);
         tableView.getColumns().add(newColumn);
         DataHandler.newColumn("col" + tableView.getColumns().size());
     }
@@ -68,28 +60,6 @@ public class Controller {
     }*/
 
 
-    //Set column names to table
-    public void getColumnNames() {
-        try {
-            ObservableList<String> data = DBcontroller.getColumns();
-            //For each column, add to table
-            for (int i = 0; i < data.size(); i++) {
-                int finalIdx = i;
-                TableColumn<ObservableList<String>, String> column = new TableColumn<>(data.get(i).toString());
-
-                //Factory (gets column data)
-                column.setCellValueFactory(param -> {
-                    String cellValue = param.getValue().get(finalIdx);
-                    return new SimpleStringProperty(cellValue);
-                });
-                tableView.getColumns().add(column);
-            }
-        } catch (
-                SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     //Gets column names and entries
     public void updateTableView() throws SQLException {
@@ -102,14 +72,26 @@ public class Controller {
         for (int i = 0; i < data.size(); i++) {
             int finalIdx = i;
             TableColumn<ObservableList<String>, String> column = new TableColumn<>(data.get(i).toString());
+            columnDatas=DBcontroller.getColumnTypes(); //Set data type to string
 
             //Factory (gets column data)
             column.setCellValueFactory(param -> {
                 String cellValue = param.getValue().get(finalIdx);
                 return new SimpleStringProperty(cellValue);
             });
-            tableView.getColumns().add(column);
 
+
+            //Make cells editable.
+            column.setCellFactory(TextFieldTableCell.forTableColumn(new DefaultStringConverter()));
+            column.setEditable(true);
+
+            column.setOnEditCommit(event -> {
+                ObservableList<String> rowData = event.getTableView().getItems().get(event.getTablePosition().getRow());
+                rowData.set(finalIdx, event.getNewValue());
+                ObservableList<String> selectedRow = (ObservableList<String>) tableView.getSelectionModel().getSelectedItem();
+                DataHandler.newEntry(selectedRow.get(0), event.getNewValue(), columnDatas.get(event.getTablePosition().getColumn()), column.getText());
+            });
+            tableView.getColumns().add(column);
         }
 
         //Entries into table

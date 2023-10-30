@@ -1,7 +1,7 @@
 import java.util.List;
 
 //Stores and does the handling of Table and Column class objects
-public class DataHandler {
+public class DataHandler<T> {
     private static Table[] table;
 
     //A database is opened
@@ -10,6 +10,11 @@ public class DataHandler {
         for (int i = 0; i < size; i++) {
             table[i] = new Table();
         }
+    }
+
+    //An entry has been modified/added
+    public static void newEntry(String ID, String value, int type, String columnName) {
+        table[0].newEntry(ID, value, type, columnName);
     }
 
     //New column created (ID=col<number> by default. Name to database deturmined by column String name)

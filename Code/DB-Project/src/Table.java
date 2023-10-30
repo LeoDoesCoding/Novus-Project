@@ -33,7 +33,7 @@ public class Table<T> {
     //Adding new entry (row + column intersection)
     //May recieve either origin ID(string) or registered ID (int)
     //Type is only used if the column has not been established
-    public void newEntry(T ID, T value, int type, String columnName) {
+    public void newEntry(String ID, String value, int type, String columnName) {
         //Check row is stored. If not, create.
         if (!IDs.containsKey(ID)) {
             newRow(String.valueOf(ID));
