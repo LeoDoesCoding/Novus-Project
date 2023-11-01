@@ -34,8 +34,7 @@ public class DBcontroller {
     public static ObservableList<String> getColumns() throws SQLException {
         ObservableList<String> data = FXCollections.observableArrayList();
 
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM Movies WHERE 1 = 0").executeQuery()) {
-            DataHandler.newDatabase(result.getMetaData().getColumnCount()); //Set empty table list
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM movies WHERE 1 = 0").executeQuery()) {
             for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
                 data.add(result.getMetaData().getColumnName(i));
             }
@@ -44,10 +43,9 @@ public class DBcontroller {
     }
 
     public static ArrayList<Integer> getColumnTypes() {
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM Movies WHERE 1 = 0").executeQuery()) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM movies WHERE 1 = 0").executeQuery()) {
 
             ArrayList<Integer> returnList = new ArrayList<Integer>();
-            DataHandler.newDatabase(result.getMetaData().getColumnCount()); //Set empty table list
             for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
                 returnList.add(result.getMetaData().getColumnType(i));
             }
@@ -60,7 +58,7 @@ public class DBcontroller {
     public static ObservableList getEntries() throws SQLException {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM Movies").executeQuery()) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM movies").executeQuery()) {
             while (result.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
