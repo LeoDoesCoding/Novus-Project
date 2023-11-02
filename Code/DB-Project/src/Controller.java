@@ -33,7 +33,6 @@ public class Controller {
         int finalIdx = tableView.getColumns().size(); //Get current size of table
         TableColumn<ObservableList<String>, String> column = new TableColumn<>("Column " + (finalIdx + 1));
         handler.typeAdd(12);
-        System.out.println(finalIdx);
 
         //Populate with empty string
         for (ObservableList<String> row : tableView.getItems()) {
@@ -56,7 +55,7 @@ public class Controller {
     }
 
 
-    
+
     //Gets column names and entries
     public void updateTableView() throws SQLException {
         //Clear existing columns and entries
@@ -64,12 +63,14 @@ public class Controller {
         tableView.getItems().clear();
 
         ObservableList<String> data = DBcontroller.getColumns();
+        this.handler.setPK(DBcontroller.getIDColumn()); //Get the primary key column
+
         //For each column, add to table
         for (int i = 0; i < data.size(); i++) {
             int finalIdx = i;
             TableColumn<ObservableList<String>, String> column = new TableColumn<>(data.get(i).toString());
+            //System.out.println(handler.IDs);
             handler.colInit(DBcontroller.getColumnTypes()); //Set data type to string
-            System.out.println(finalIdx);
 
             //Factory (gets column data)
             column.setCellValueFactory(param -> {
@@ -86,7 +87,6 @@ public class Controller {
                 ObservableList<String> rowData = event.getTableView().getItems().get(event.getTablePosition().getRow());
                 rowData.set(finalIdx, event.getNewValue());
                 ObservableList<String> selectedRow = (ObservableList<String>) tableView.getSelectionModel().getSelectedItem();
-                System.out.println("Time to add to handler..");
                 handler.newEntry(selectedRow.get(0), event.getNewValue(), event.getTablePosition().getColumn(), column.getText());
             });
             tableView.getColumns().add(column);
@@ -94,5 +94,14 @@ public class Controller {
 
         //Entries into table
         tableView.getItems().addAll(DBcontroller.getEntries());
+        //String IDColumn = DBcontroller.getIDColumn();
+        //handler.addRows(DBcontroller.getColumn(IDColumn));
+        //handler.addRows(DBcontroller.getIDs());
+    }
+
+
+    @FXML
+    private void saveToDatabase() {
+        DBcontroller.saveToDatabase(handler.saveToDatabase());
     }
 }

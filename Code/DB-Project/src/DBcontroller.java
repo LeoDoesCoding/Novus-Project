@@ -96,6 +96,55 @@ public class DBcontroller {
         } catch (SQLException e) { throw new RuntimeException(e);}
     }
 
+
+    //Find out which column has the primary IDs
+    public static String getIDColumn() throws SQLException {
+        String tableName = "Movies";
+        String sql = "SELECT KU.column_name as PRIMARYKEYCOLUMN FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS TC "
+                + "INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KU "
+                + "ON TC.CONSTRAINT_TYPE = 'PRIMARY KEY' "
+                + "AND TC.CONSTRAINT_NAME = KU.CONSTRAINT_NAME "
+                + "AND KU.table_name=?";
+
+        try (PreparedStatement preparedStatement = SQLcon.prepareStatement(sql)) {
+            preparedStatement.setString(1, tableName);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String primaryKeyColumn = resultSet.getString("PRIMARYKEYCOLUMN");
+                    System.out.println("Primary Key Column for table " + tableName + ": " + primaryKeyColumn);
+                    return primaryKeyColumn;
+                } else {
+                    System.out.println("No primary key found for table " + tableName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static ArrayList<String> getColumn(String colName) {
+        ArrayList<String> toReturn = new ArrayList<>();
+        try (ResultSet result = SQLcon.prepareStatement("SELECT " + colName + " FROM movies").executeQuery()) {
+            while(result.next()) {
+                toReturn.add(result.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return toReturn;
+    }
+
+
+    public static void saveToDatabase(String toExecute) {
+        try (ResultSet result = SQLcon.prepareStatement(toExecute).executeQuery()) {
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
 
 
