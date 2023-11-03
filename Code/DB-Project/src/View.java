@@ -21,18 +21,35 @@ public class View extends Application {
 
     @Override
     public void start(Stage primaryStage) throws SQLException, IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginView.fxml"));
         Parent root = loader.load();
-        DBcontroller.autologin();
-        Controller controller = loader.getController();
+        loginController controller = loader.getController();
+        //DBcontroller.autologin();
 
+        //Successful login, load main page
+        controller.setLoginAction(() -> {
+                try {
+                    FXMLLoader mainLoader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+                    Parent mainRoot = mainLoader.load();
+                    Controller mainController = mainLoader.getController();
 
-        //Table stuff
-        controller.updateTableView();
+                    mainController.init();
+                    //ONLY DO THIS WHEN NOT CHOSING DATABASE
+                    mainController.updateTableView();
 
+                    //Load MainView
+                    Scene mainScene = new Scene(mainRoot, 800, 500);
+                    primaryStage.setResizable(true);
+                    primaryStage.setScene(mainScene);
+                    primaryStage.setTitle("CRUDinator");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        });
 
-        primaryStage.setScene(new Scene(root, 800, 500));
-        primaryStage.setTitle("Dynamic Table Example");
+        primaryStage.setScene(new Scene(root, 300, 350));
+        primaryStage.setTitle("CRUDinator Login");
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 }

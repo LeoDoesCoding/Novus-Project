@@ -11,36 +11,45 @@
 <?import javafx.geometry.Insets?>
 
 <?import javafx.scene.control.Button?>
-<VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<VBox prefHeight="400.0" prefWidth="800" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
     <children>
-        <MenuBar VBox.vgrow="NEVER">
-            <menus>
-                <Menu mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="New" />
-                        <MenuItem mnemonicParsing="false" text="Open…" />
-                        <Menu mnemonicParsing="false" text="Open Recent" />
-                        <MenuItem mnemonicParsing="false" text="Quit" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Undo" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-        <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
-            <Button text="save data" layoutY="20.0" layoutX="300" onAction="#saveToDatabase"/>
-            <Button text="Add Row" layoutY="10.0" layoutX="120" onAction="#addRow"/>
-            <Button text="New column" layoutY="30.0" layoutX="120" onAction="#addColumn"/>
+        <!--Database display bar-->
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="344.0" minWidth="10.0" prefWidth="344.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="265.33331298828125" minWidth="10.0" prefWidth="196.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
             <children>
-                <TabPane layoutY="56.0" tabClosingPolicy="UNAVAILABLE">
+                <Label text="Currently in database:" />
+                <Button mnemonicParsing="false" text="Select Database" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
+                <Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
+                <ComboBox fx:id="DBcomboBox" prefHeight="25.0" prefWidth="333.0" GridPane.rowIndex="1" />
+                <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Save Data" onAction="#saveToDatabase" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            </children>
+
+
+            <VBox.margin>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="5.0" />
+            </VBox.margin>
+        </GridPane>
+
+
+        <AnchorPane VBox.vgrow="ALWAYS">
+            <Button text="Add Row" layoutY="100" layoutX="650" onAction="#addRow"/>
+            <Button text="New column" layoutY="130" layoutX="650" onAction="#addColumn"/>
+            <children>
+                <TabPane layoutY="65" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
                     <tabs>
                         <Tab text="Untitled Tab 1">
                             <content>

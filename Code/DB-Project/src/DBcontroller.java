@@ -23,12 +23,26 @@ public class DBcontroller {
     static boolean loginAttempt(String url, String user, String pass){
         try (Connection conAttempt = DriverManager.getConnection(url, user, pass)) {
             System.out.println(conAttempt);
+            SQLcon = DriverManager.getConnection(url, user, pass); //Set SQLcon to this successful connection
             return (true);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return (false);
         }
     }
+
+
+    //Get available databases
+    public static ArrayList<String> getDatabases() throws SQLException {
+        ArrayList<String> toReturn = new ArrayList<String>();
+        DatabaseMetaData meta = SQLcon.getMetaData();
+        ResultSet res = meta.getCatalogs();
+        while (res.next()) {
+            toReturn.add(res.getString("TABLE_CAT"));
+        }
+        return toReturn;
+    }
+
 
     //Gets table columns
     public static ObservableList<String> getColumns() throws SQLException {
@@ -74,13 +88,15 @@ public class DBcontroller {
 
 
     //Gets table for opened database
-    static void getTables(String myDB) throws SQLException {
+    static ArrayList<String> getTables(String myDB) throws SQLException {
+        ArrayList<String> toReturn = new ArrayList<>();
         try {
             DatabaseMetaData md = SQLcon.getMetaData();
             ResultSet retrival = md.getTables(myDB, "dbo", "%", null);
             while (retrival.next()){
-                System.out.println(retrival.getString(3));
+                toReturn.add(retrival.getString(3));
             }
+            return toReturn;
         } catch (SQLException e) { throw new RuntimeException(e);}
     }
 

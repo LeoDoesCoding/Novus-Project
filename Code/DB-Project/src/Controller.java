@@ -2,14 +2,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.DefaultStringConverter;
 
+import javax.swing.*;
 import java.sql.SQLException;
 
 public class Controller {
@@ -25,7 +23,16 @@ public class Controller {
     @FXML
     private Button addColumnButt;
 
+    @FXML
+    private ComboBox<String> DBcomboBox;
+
     private Table handler = new Table(); //Table object, handles once instance of a table.
+
+
+    public void init() throws SQLException {
+        //Populate combobox
+        DBcomboBox.getItems().setAll(DBcontroller.getDatabases());
+    }
 
 
     //Adds new (blank) column
