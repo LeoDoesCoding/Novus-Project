@@ -1,11 +1,8 @@
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TableView?>
+
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.geometry.Insets?>
@@ -31,11 +28,11 @@
             </rowConstraints>
             <children>
                 <Label text="Currently in database:" />
-                <Button mnemonicParsing="false" text="Select Database" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Button mnemonicParsing="false" text="Select Database" onAction="#selectDatabase" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
                 <Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
                 <ComboBox fx:id="DBcomboBox" prefHeight="25.0" prefWidth="333.0" GridPane.rowIndex="1" />
-                <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Save Data" onAction="#saveToDatabase" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Save Data" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             </children>
 
 
@@ -46,31 +43,8 @@
 
 
         <AnchorPane VBox.vgrow="ALWAYS">
-            <Button text="Add Row" layoutY="100" layoutX="650" onAction="#addRow"/>
-            <Button text="New column" layoutY="130" layoutX="650" onAction="#addColumn"/>
             <children>
-                <TabPane layoutY="65" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
-                    <tabs>
-                        <Tab text="Untitled Tab 1">
-                            <content>
-                                <Pane prefHeight="292.0" prefWidth="640.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="10.0">
-                                    <children>
-                                        <TableView fx:id="tableView" prefHeight="500.0" prefWidth="620.0" editable="true">
-                                        </TableView>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                    </padding>
-                                </Pane>
-                            </content>
-                        </Tab>
-                        <Tab text="Untitled Tab 2">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                            </content>
-                        </Tab>
-                    </tabs>
-                </TabPane>
+                <TabPane fx:id="tabPane" layoutY="65" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS"/>
                 <Text layoutX="14.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Currently in database:" />
                 <Text layoutX="14.0" layoutY="44.0" strokeType="OUTSIDE" strokeWidth="0.0" text="&lt;DATABASE HERE&gt;" />
                 <Text layoutX="453.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Logged in as user: &lt;USERHERE&gt;" textAlignment="RIGHT" />

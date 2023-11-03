@@ -5,6 +5,8 @@ import java.util.*;
 
 //Manages a table's runtime storage. Created as an instance in Controller.java
 public class Table<T> {
+    private String DBname;
+    private String tableName;
     private ArrayList<Integer> columnTypes = new ArrayList<Integer>(); //columns data types
     private ArrayList<Integer> columnIDs = new ArrayList<Integer>(); //The ordered IDs of the current view (as primary key may be altered)
     public ArrayList<String> newRows = new ArrayList<String>(); //Primary key value for new entries Must be iterating for INSERT in save to database.
@@ -12,9 +14,12 @@ public class Table<T> {
     //public Map<Integer, String> IDs = new HashMap<>(1); //key = arbuitary value for operation, value = original database key to map onto database.
     private String PK;
 
-    public Table(){
-
+    public Table(String DBname, String tableName){
+        this.DBname = DBname;
+        this.tableName = tableName;
     }
+    public String getTable() { return this.tableName; }
+    public String getDB() { return this.DBname; }
 
     //Column stuff
     //Initialise columnTypes from imported columns
@@ -32,7 +37,7 @@ public class Table<T> {
     for (String key : columns.keySet()){
         System.out.println("Next column:" + key);}
     } //New column (pass from Table)
-    public void importColumn(String name) { columns.put(name, new Column(name, DBcontroller.typeOf(name), false)); } //Imported column (pass from Controller)
+    public void importColumn(String name) { columns.put(name, new Column(name, DBcontroller.typeOf(this.tableName, name), false)); } //Imported column (pass from Controller)
     public void setColumnName(String ID, String newName) { columns.get(ID).setName(newName); }
 
 
@@ -45,13 +50,13 @@ public class Table<T> {
         while (!newKey) {
             //If PK type is string, generate a UUID. Else, generate a random number.
             //We are assuming of course it is either a String or number. Not strictly true ^^'
-            if (DBcontroller.typeOf(PK) == 4){
-                ID = String.valueOf(Integer.valueOf((int) (Integer.valueOf((ID)) + DBcontroller.highestID(PK) + 1))); //+1 in case (unlikely) the retrived new highest value is already present
+            if (DBcontroller.typeOf(tableName, PK) == 4){
+                ID = String.valueOf(Integer.valueOf((int) (Integer.valueOf((ID)) + DBcontroller.highestID(tableName, PK) + 1))); //+1 in case (unlikely) the retrived new highest value is already present
             } else {
                 Random rand = new Random();
                 ID = "newRow" + rand.nextInt(1000); //example: newRow55645.
             }
-            newKey=(DBcontroller.checkID(ID, PK) && !newRows.contains(ID));
+            newKey=(DBcontroller.checkID(tableName, ID, PK) && !newRows.contains(ID));
         }
         //New key obtained, add to newRows as new ID.
         newRows.add(ID);

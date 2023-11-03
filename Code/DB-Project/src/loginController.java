@@ -47,7 +47,7 @@ public class loginController {
 
             //Run check statement sepperately as to not freeze program
             CompletableFuture.supplyAsync(() -> {
-                return DBcontroller.loginAttempt("jdbc:sqlserver://" + URLField.getText() + ";databaseName=testDB",
+                return DBcontroller.loginAttempt("jdbc:sqlserver://" + URLField.getText(),
                         userField.getText(), passField.getText());
             }).thenAcceptAsync(loginSuccessful -> {
                 Platform.runLater(() -> {

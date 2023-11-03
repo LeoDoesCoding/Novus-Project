@@ -35,7 +35,7 @@ public class View extends Application {
 
                     mainController.init();
                     //ONLY DO THIS WHEN NOT CHOSING DATABASE
-                    mainController.updateTableView();
+                    //mainController.updateTableView();
 
                     //Load MainView
                     Scene mainScene = new Scene(mainRoot, 800, 500);

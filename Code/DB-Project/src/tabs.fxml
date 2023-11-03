@@ -1,0 +1,9 @@
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Tab?>
+
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="TableController">
+    <Tab text="Tab Name">
+        <fx:include fx:id="tableContent" source="tableContent.fxml" />
+        <content></content>
+    </Tab>
+</AnchorPane>
