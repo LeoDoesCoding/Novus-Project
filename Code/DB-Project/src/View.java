@@ -31,7 +31,7 @@ public class View extends Application {
         controller.updateTableView();
 
 
-        primaryStage.setScene(new Scene(root, 400, 300));
+        primaryStage.setScene(new Scene(root, 800, 500));
         primaryStage.setTitle("Dynamic Table Example");
         primaryStage.show();
     }

@@ -1,4 +1,5 @@
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -31,8 +32,9 @@ public class Controller {
     @FXML
     private void addColumn() {
         int finalIdx = tableView.getColumns().size(); //Get current size of table
-        TableColumn<ObservableList<String>, String> column = new TableColumn<>("Column " + (finalIdx + 1));
-        handler.typeAdd(12);
+        TableColumn<ObservableList<String>, String> column = new TableColumn<>("Column" + (finalIdx + 1));
+        handler.typeAdd(12); //Add to list of current view's columns
+        handler.addColumn("Column" + (finalIdx + 1)); //New column
 
         //Populate with empty string
         for (ObservableList<String> row : tableView.getItems()) {
@@ -47,11 +49,10 @@ public class Controller {
             ObservableList<String> rowData = event.getTableView().getItems().get(event.getTablePosition().getRow());
             rowData.set(finalIdx, event.getNewValue());
             ObservableList<String> selectedRow = (ObservableList<String>) tableView.getSelectionModel().getSelectedItem();
-            handler.newEntry(selectedRow.get(0), event.getNewValue(), event.getTablePosition().getColumn(), column.getText());
+            handler.newEntry(selectedRow.get(0), event.getNewValue(), column.getText());
         });
 
         tableView.getColumns().add(column);
-        handler.addColumn("col" + (tableView.getColumns().size()));
     }
 
 
@@ -59,6 +60,7 @@ public class Controller {
     //Gets column names and entries
     public void updateTableView() throws SQLException {
         //Clear existing columns and entries
+
         tableView.getColumns().clear();
         tableView.getItems().clear();
 
@@ -69,8 +71,10 @@ public class Controller {
         for (int i = 0; i < data.size(); i++) {
             int finalIdx = i;
             TableColumn<ObservableList<String>, String> column = new TableColumn<>(data.get(i).toString());
+            column.setPrefWidth(100); //Set width
             //System.out.println(handler.IDs);
             handler.colInit(DBcontroller.getColumnTypes()); //Set data type to string
+
 
             //Factory (gets column data)
             column.setCellValueFactory(param -> {
@@ -87,7 +91,7 @@ public class Controller {
                 ObservableList<String> rowData = event.getTableView().getItems().get(event.getTablePosition().getRow());
                 rowData.set(finalIdx, event.getNewValue());
                 ObservableList<String> selectedRow = (ObservableList<String>) tableView.getSelectionModel().getSelectedItem();
-                handler.newEntry(selectedRow.get(0), event.getNewValue(), event.getTablePosition().getColumn(), column.getText());
+                handler.newEntry(selectedRow.get(0), event.getNewValue(), column.getText());
             });
             tableView.getColumns().add(column);
         }
@@ -101,7 +105,29 @@ public class Controller {
 
 
     @FXML
-    private void saveToDatabase() {
+    private void saveToDatabase() throws SQLException {
+        //SWITCH COMMENT TO SAVE TO DATABASE
         DBcontroller.saveToDatabase(handler.saveToDatabase());
+        //handler.saveToDatabase();
+    }
+
+    @FXML
+    private void addRow() {
+        ObservableList<String> emptyRow = FXCollections.observableArrayList();
+
+        //Empty string for eac column
+        for (int i = 0; i < tableView.getColumns().size(); i++) {
+            emptyRow.add("");
+        }
+
+        tableView.getItems().add(emptyRow);
+        String ID = handler.addRow(); //Add row with arbuitary value as key.
+
+        //Add primary key (by iterating tableView's columns)
+        for (TableColumn<ObservableList<String>, ?> column : tableView.getColumns()) { //Javafx kinda sucks
+            if (column.getText().equals(handler.getPK())) {
+                emptyRow.set(tableView.getColumns().indexOf(column), ID);
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ public class DBcontroller {
     public static ObservableList<String> getColumns() throws SQLException {
         ObservableList<String> data = FXCollections.observableArrayList();
 
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM movies WHERE 1 = 0").executeQuery()) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM EXAMPLE WHERE 1 = 0").executeQuery()) {
             for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
                 data.add(result.getMetaData().getColumnName(i));
             }
@@ -43,7 +43,7 @@ public class DBcontroller {
     }
 
     public static ArrayList<Integer> getColumnTypes() {
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM movies WHERE 1 = 0").executeQuery()) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM EXAMPLE WHERE 1 = 0").executeQuery()) {
 
             ArrayList<Integer> returnList = new ArrayList<Integer>();
             for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
@@ -58,7 +58,7 @@ public class DBcontroller {
     public static ObservableList getEntries() throws SQLException {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM movies").executeQuery()) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM EXAMPLE").executeQuery()) {
             while (result.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
@@ -99,7 +99,7 @@ public class DBcontroller {
 
     //Find out which column has the primary IDs
     public static String getIDColumn() throws SQLException {
-        String tableName = "Movies";
+        String tableName = "EXAMPLE";
         String sql = "SELECT KU.column_name as PRIMARYKEYCOLUMN FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS TC "
                 + "INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KU "
                 + "ON TC.CONSTRAINT_TYPE = 'PRIMARY KEY' "
@@ -127,7 +127,7 @@ public class DBcontroller {
 
     public static ArrayList<String> getColumn(String colName) {
         ArrayList<String> toReturn = new ArrayList<>();
-        try (ResultSet result = SQLcon.prepareStatement("SELECT " + colName + " FROM movies").executeQuery()) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT " + colName + " FROM EXAMPLE").executeQuery()) {
             while(result.next()) {
                 toReturn.add(result.getString(1));
             }
@@ -138,11 +138,46 @@ public class DBcontroller {
     }
 
 
-    public static void saveToDatabase(String toExecute) {
-        try (ResultSet result = SQLcon.prepareStatement(toExecute).executeQuery()) {
+    public static void saveToDatabase(String toExecute) throws SQLException {
+        Statement statement = SQLcon.createStatement();
+        statement.executeUpdate(toExecute);
+    }
+
+    //Check if passed key is present. If it is not, return true (counter intuitive, I know)
+    public static boolean checkID(String ID, String pColumn) {
+        try (PreparedStatement preparedStatement = SQLcon.prepareStatement("SELECT * FROM EXAMPLE WHERE " + pColumn + " = " + ID)) {
+            //preparedStatement.setString(1, ID);
+            try (ResultSet result = preparedStatement.executeQuery()) {
+                if (result.next()) { //Present. Return false.
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception according to your application's requirements
+        }
+        //Not present. Return true.
+        return true;
+    }
+
+    //Return the data type of column
+    public static int typeOf(String column) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT " + column + " FROM EXAMPLE WHERE 1 = 0").executeQuery()) {
+            return result.getMetaData().getColumnType(1);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    //Get highest ID
+    public static double highestID(String pColumn) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT MAX(" + pColumn + ") AS max_value FROM EXAMPLE").executeQuery()) {
+            if (result.next()) {
+                return (result.getInt("max_value"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return -1;
     }
 
 }

@@ -22,9 +22,7 @@ public class Column<T> {
     }
 
     //Getters
-    public int getType(){
-        return this.type;
-    }
+    public int getType(){ return this.type; }
     public T getEntry(int ID) {
         if (this.entries.get(ID) != null) {
             return this.entries.get(ID);
@@ -33,7 +31,7 @@ public class Column<T> {
         }
     }
     public int size(){ return entries.size();}
-    public boolean containsKey (int ID) {return entries.containsKey(ID);}
+    public boolean containsKey (String ID) {return entries.containsKey(ID);}
     public void setName(String name){this.name = name;}
     public boolean isNew(){return this.isNew;}
     public Map<String, T> getEntries() { return this.entries; }
