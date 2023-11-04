@@ -40,7 +40,7 @@
 
         <AnchorPane VBox.vgrow="ALWAYS">
             <children>
-                <TabPane fx:id="tabPane" layoutY="65" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS"/>
+                <TabPane fx:id="tabPane" layoutY="10" prefWidth="800" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS"/>
             </children>
         </AnchorPane>
 

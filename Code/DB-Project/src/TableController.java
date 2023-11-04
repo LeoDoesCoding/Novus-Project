@@ -56,13 +56,14 @@ public class TableController {
 
         ObservableList<String> data = DBcontroller.getColumns(handler.getTable());
         this.handler.setPK(DBcontroller.getIDColumn(handler.getTable())); //Get the primary key column
+        handler.colInit(DBcontroller.getColumnTypes(handler.getTable())); //Set data type to string
+
 
         //For each column, add to table
         for (int i = 0; i < data.size(); i++) {
             int finalIdx = i;
             TableColumn<ObservableList<String>, String> column = new TableColumn<>(data.get(i).toString());
             column.setPrefWidth(100); //Set width
-            handler.colInit(DBcontroller.getColumnTypes(handler.getTable())); //Set data type to string
 
 
             //Factory (gets column data)

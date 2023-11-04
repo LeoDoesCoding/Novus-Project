@@ -12,6 +12,6 @@
           <Button fx:id="addColumnButt" onAction="#addColumn" text="Add Column" />
       </children>
    </HBox>
-    <TableView fx:id="tableView" editable="true" layoutY="30.0" prefHeight="470.0" prefWidth="620.0">
+    <TableView fx:id="tableView" editable="true" layoutY="30.0" maxHeight="400" prefWidth="620.0">
     </TableView>
 </AnchorPane>
