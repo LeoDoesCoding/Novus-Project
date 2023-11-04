@@ -33,10 +33,7 @@ public class Table<T> {
     public void typeAdd(int type){ columnTypes.add(type); }
 
     //Creates a new column
-    public void addColumn(String name) { columns.put(name, new Column(name, 12, true));
-    for (String key : columns.keySet()){
-        System.out.println("Next column:" + key);}
-    } //New column (pass from Table)
+    public void addColumn(String name) { columns.put(name, new Column(name, 12, true)); } //New column (pass from Table)
     public void importColumn(String name) { columns.put(name, new Column(name, DBcontroller.typeOf(this.tableName, name), false)); } //Imported column (pass from Controller)
     public void setColumnName(String ID, String newName) { columns.get(ID).setName(newName); }
 
@@ -68,7 +65,6 @@ public class Table<T> {
     //May recieve either origin ID(string) or registered ID (int)
     //Type is only used if the column has not been established
     public void newEntry(String ID, String value, String columnName) {
-
         //Check column is present. If not, import. (newly created columns already added)
         if (!columns.containsKey(columnName)) {
             importColumn(columnName);
@@ -79,38 +75,51 @@ public class Table<T> {
     }
 
 
+    //Check if changes have been made for table (ie, is there any data stored here)
+    public boolean isModified() {
+        if (newRows.isEmpty() && columns.isEmpty()){ return false; }
+        else { return true;}
+    }
 
-    //Mmm delicous spaghetti
-    //Save to Database preparation
-    public String saveToDatabase() throws SQLException {
+
+
+
+    //DATABASE QUERY STUFF (returns query strings)--------
+    //get ALTER queries (new column) currently string by default.
+    public String getAlters() {
+        StringBuilder toReturn = new StringBuilder();
+
+        //Iterate each column for new columns
+        for (Map.Entry<String, Column> column : columns.entrySet()) {
+            if (column.getValue().isNew()) {
+                toReturn.append("ALTER TABLE EXAMPLE ADD " + column.getKey() + " varchar(255);");
+            }
+        }
+        return toReturn.toString();
+    }
+
+
+    //Get INSERT queries
+    public String getInserts() {
+        StringBuilder toReturn = new StringBuilder(); //Key=row, value =columns
+
+        //For each new row, create an INSERT query to add an ID
+        for (String row : newRows) {
+            toReturn.append("INSERT INTO " + tableName + " (" + PK + ") VALUES (" + row + ");"); //Adding the primary column to insert
+        }
+
+        return toReturn.toString();
+    }
+
+
+    //get UPDATE queries
+    public String getUpdates() {
         String apo;
         HashMap<String, String> toReturnList = new HashMap<>(); //Key=entryID, value="UPDATE _ SET" (append "WHERE" at end of looping
-        HashMap<String, String> newRow1 = new HashMap<String, String>(); //Key=row, value =columns
-        HashMap<String, String> newRow2 = new HashMap<String, String>(); //Key=row, value = values of column^
-        StringBuilder newReturns = new StringBuilder(); //Final return string (all queries)
-
-        //ADD NEW COLUMNS
-        for (Map.Entry<String, Column> column : columns.entrySet()) {
-            if(column.getValue().isNew()) {
-                newReturns.append("ALTER TABLE EXAMPLE ADD " + column.getKey() + " varchar(255);");
-                System.out.println(newReturns);
-                DBcontroller.saveToDatabase(newReturns.toString());//Send query for new colunns
-                newReturns.setLength(0); //Clear
-            }
-        }
-
-        //UPDATING OLD ENTRIES + INSERTING NEW
-        //If new rows, add IDs column (this is outside of column iteration)
-        for (String row : newRows) {
-            if(!columns.containsKey(PK) || columns.containsKey(PK) && !columns.get(PK).containsKey(row)) { //If ID has not been renamed, add original given ID. Else, it will be added in the columns iteration
-                newRow1.put(row, PK); //Adding the primary column to insert
-                newRow2.put(row, row); //Adding the primary column's value to insert. Might need to change when adding changing primary key
-            }
-        }
 
         //Iterate each column
         for (Map.Entry<String, Column> column : columns.entrySet()) {
-            System.out.println(column.getKey() + " is type " + column.getValue().getType());
+            //If it is a string-type columnm, put appostrophies either side of values
             if (column.getValue().getType() == 12 || column.getValue().getType() == -15) { apo = "'"; } else { apo = "";}
 
             //Iterate column's entries
@@ -118,61 +127,32 @@ public class Table<T> {
             for (Map.Entry<String, T> entry : entries.entrySet()) { //Iterate column's data
                 String ID = entry.getKey(); //For readability's sake
                 //If ID is not already present for UPDATED queries, add opening of query
-                if (!toReturnList.containsKey(ID) && !newRows.contains(ID)) { //For pre-existing entries
-                    toReturnList.put(ID, "UPDATE EXAMPLE SET ");
+                if (!toReturnList.containsKey(ID)) { //For pre-existing entries
+                    toReturnList.put(ID, "UPDATE " + tableName + " SET ");
                 }
 
                 //Now, add the values and columns
-                if (newRows.contains(ID)){ //It is a new row
-                    //System.out.println("newRow contains " + ID + ", so enter " + column.getKey());
-                    newRow1.put(ID, newRow1.get(ID) + ", " + column.getKey()); //Columns
-                    newRow2.put(ID, newRow2.get(ID) + ", " + apo + entry.getValue() + apo); //Values
-                } else { //It is a pre-existing row
-                    toReturnList.put(ID, toReturnList.get(ID) + column.getKey() + " = " + apo +  entry.getValue() + apo + ","); //Get index, append item
-                }
+                toReturnList.put(ID, toReturnList.get(ID) + column.getKey() + " = " + apo +  entry.getValue() + apo + ","); //Get index, append item
             }
         }
 
-        //Adding tail to UPDATE query
+        //Adding tail to UPDATE query (WHERE <primaryKeyColumn> = ID;)
         for  (Map.Entry<String, String> entry : toReturnList.entrySet()) {
             toReturnList.put(entry.getKey(),  entry.getValue().substring(0, entry.getValue().length() - 1) + " WHERE " + this.PK + " = " + entry.getKey() + ";");
         }
 
-        System.out.println(newRow1);
-        //Formatting INSERT queries
-        if (!newRows.isEmpty()) {
-            //Iterate each row
-            for (String ID : newRow1.keySet()) {
-                newReturns.append("INSERT INTO EXAMPLE (");
-                //Adding columns
-                newReturns.append(newRow1.get(ID));
-
-                //Delete final commar off last column
-                //newReturns.deleteCharAt(newReturns.length() - 1);
-                //Adding values for columns
-                newReturns.append(") VALUES (");
-                newReturns.append(newRow2.get(ID));
-                //Delete final commar off last value
-                //newReturns.deleteCharAt(newReturns.length() - 1);
-                //Add bracket and semicolon to end query
-                newReturns.append(");");
-            }
-        }
-        //INSERTS done
 
         //Get toReturnList as a single string
         String toReturn = toReturnList.values()
                 .stream()
                 .map(Object::toString)
                 .reduce("", String::concat);
-        newReturns.append(toReturn); //Add updated entries
 
-        System.out.println(newReturns.toString());
 
         //Now view is same as hashmap. Clear hashmaps.
         newRows.clear();
         columns.clear();
-        return newReturns.toString();
+        return toReturn;
     }
 }
 

@@ -13,7 +13,7 @@ public class TableController {
     @FXML
     private TableView<ObservableList<String>> tableView;
 
-    private Table handler; //Table object, handles once instance of a table.
+    protected Table handler; //Table object, handles once instance of a table.
 
 
     //Adds new (blank) column
@@ -62,7 +62,6 @@ public class TableController {
             int finalIdx = i;
             TableColumn<ObservableList<String>, String> column = new TableColumn<>(data.get(i).toString());
             column.setPrefWidth(100); //Set width
-            //System.out.println(handler.IDs);
             handler.colInit(DBcontroller.getColumnTypes(handler.getTable())); //Set data type to string
 
 
@@ -88,18 +87,8 @@ public class TableController {
 
         //Entries into table
         tableView.getItems().addAll(DBcontroller.getEntries(handler.getTable()));
-        //String IDColumn = DBcontroller.getIDColumn();
-        //handler.addRows(DBcontroller.getColumn(IDColumn));
-        //handler.addRows(DBcontroller.getIDs());
     }
 
-
-    @FXML
-    private void saveToDatabase() throws SQLException {
-        //SWITCH COMMENT TO SAVE TO DATABASE
-        DBcontroller.saveToDatabase(handler.saveToDatabase());
-        //handler.saveToDatabase();
-    }
 
     @FXML
     private void addRow() {
@@ -119,5 +108,15 @@ public class TableController {
                 emptyRow.set(tableView.getColumns().indexOf(column), ID);
             }
         }
+    }
+
+
+
+    //TABLE METHODS
+    //Check for changes to table
+    public boolean isModified() {
+        if (handler.isModified()) {
+            return true;
+        } else { return false; }
     }
 }

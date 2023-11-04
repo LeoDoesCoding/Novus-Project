@@ -6,7 +6,6 @@ import java.util.ArrayList;
 //Manages the SQL connection and ferries queries
 public class DBcontroller {
     static protected Connection SQLcon;
-    static protected String DB = "testDB";
     static protected String url;
     static protected String user;
     static protected String pass;
@@ -18,7 +17,7 @@ public class DBcontroller {
         user = newuser;
         pass = newpass;
         try (Connection conAttempt = DriverManager.getConnection(url, user, pass)) {
-            System.out.println(conAttempt);
+            System.out.println("Login successful. Creating connection to " + url);
             SQLcon = DriverManager.getConnection(url, user, pass); //Set SQLcon to this successful connection
             return (true);
         } catch (SQLException e) {
@@ -28,8 +27,8 @@ public class DBcontroller {
     }
 
     static void chooseDatabase(String db) throws SQLException {
-        System.out.println(url + ";database = " + db);
         url= url + ";databaseName=" + db;
+        System.out.println("Connecting to " + url);
         try (Connection conAttempt = DriverManager.getConnection(url, user, pass)) {
             SQLcon.close();
             SQLcon = DriverManager.getConnection(url, user, pass); //Set SQLcon to this successful connection
@@ -64,7 +63,7 @@ public class DBcontroller {
     }
 
     public static ArrayList<Integer> getColumnTypes(String table) {
-        System.out.println("SELECT * FROM " + table + "WHERE 1 = 0");
+        System.out.println("Getting column types for " + table);
         try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM " + table + " WHERE 1 = 0").executeQuery()) {
 
             ArrayList<Integer> returnList = new ArrayList<Integer>();
