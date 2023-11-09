@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="300.0" alignment="CENTER" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="loginController">
+   <children>
+      <Label prefHeight="17.0" prefWidth="313.0" text="Login to SQL server">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label prefHeight="17.0" prefWidth="269.0" text="URL">
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </Label>
+      <TextField fx:id="URLField" promptText="localhost"/>
+      <Label prefHeight="17.0" prefWidth="269.0" text="User">
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin>
+      </Label>
+      <TextField fx:id="userField" promptText="SA"/>
+      <Label id="PassField" prefHeight="17.0" prefWidth="269.0" text="Password">
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin>
+      </Label>
+      <PasswordField fx:id="passField"/>
+      <Button fx:id="loginButt" onAction="#loginAttempt" text="Login"/>
+      <Label fx:id="status" prefHeight="17.0" prefWidth="269.0" text=""/>
+   </children>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+   <padding>
+      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+   </padding>
+</VBox>

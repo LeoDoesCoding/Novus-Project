@@ -1,0 +1,48 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TabPane?>
+
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<VBox prefHeight="330.0" prefWidth="800" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+    <children>
+        <!--Database display bar-->
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="344.0" minWidth="10.0" prefWidth="344.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="265.33331298828125" minWidth="10.0" prefWidth="196.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+            </rowConstraints>
+            <children>
+                <Label text="Currently in database:" />
+                <Button mnemonicParsing="false" text="Select Database" onAction="#selectDatabase" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <!--Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" /-->
+                <ComboBox fx:id="DBcomboBox" prefHeight="25.0" prefWidth="333.0" GridPane.rowIndex="1" />
+                <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Save Data" onAction="#saveToDatabase" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            </children>
+
+
+            <VBox.margin>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="5.0" />
+            </VBox.margin>
+        </GridPane>
+
+        <AnchorPane VBox.vgrow="ALWAYS">
+            <children>
+                <TabPane fx:id="tabPane" layoutY="10" prefWidth="800" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS"/>
+            </children>
+        </AnchorPane>
+
+    </children>
+</VBox>
