@@ -1,5 +1,7 @@
+package com.CRUDinator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -9,6 +11,18 @@ public class DBcontroller {
     static protected String url;
     static protected String user;
     static protected String pass;
+
+    //DEBUG logs in
+    static void autoLogin(String DB) throws SQLException {
+        String url = "jdbc:sqlserver://localhost;databaseName=" + DB;
+        String user = "SA";
+        String pass = "abc";
+
+        if (loginAttempt(url, user, pass)) {
+            SQLcon = DriverManager.getConnection(url, user, pass);
+        }
+    }
+
 
 
     //If true, a connection should be established to static, and the next scene loaded.
@@ -26,6 +40,8 @@ public class DBcontroller {
         }
     }
 
+
+    //Closes connection and re-establishes a new one with selected database
     static void chooseDatabase(String db) throws SQLException {
         url= url + ";databaseName=" + db;
         System.out.println("Connecting to " + url);
@@ -50,7 +66,7 @@ public class DBcontroller {
     }
 
 
-    //Gets table columns
+    //Gets table column names
     public static ObservableList<String> getColumns(String table) throws SQLException {
         ObservableList<String> data = FXCollections.observableArrayList();
 
@@ -62,20 +78,8 @@ public class DBcontroller {
         return data;
     }
 
-    public static ArrayList<Integer> getColumnTypes(String table) {
-        System.out.println("Getting column types for " + table);
-        try (ResultSet result = SQLcon.prepareStatement("SELECT * FROM " + table + " WHERE 1 = 0").executeQuery()) {
 
-            ArrayList<Integer> returnList = new ArrayList<Integer>();
-            for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
-                returnList.add(result.getMetaData().getColumnType(i));
-            }
-            return returnList;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    //Gets all entries of a table and passes it as an ObservableList (to be displayed in TableView)
     public static ObservableList getEntries(String table) throws SQLException {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
         System.out.println("SELECT * FROM " + table);
@@ -134,6 +138,7 @@ public class DBcontroller {
     }
 
 
+    //Get singular (named) column from database
     public static ArrayList<String> getColumn(String table, String colName) {
         ArrayList<String> toReturn = new ArrayList<>();
         try (ResultSet result = SQLcon.prepareStatement("SELECT " + colName + " FROM " + table).executeQuery()) {
@@ -147,14 +152,23 @@ public class DBcontroller {
     }
 
 
+    //Send query to database
     public static void saveToDatabase(String toExecute) throws SQLException {
         Statement statement = SQLcon.createStatement();
         statement.executeUpdate(toExecute);
     }
 
+
     //Check if passed key is present. If it is not, return true (counter intuitive, I know)
     public static boolean checkID(String table, String ID, String pColumn) {
-        try (PreparedStatement preparedStatement = SQLcon.prepareStatement("SELECT * FROM " + table + " WHERE " + pColumn + " = " + ID)) {
+        String apo;
+        if (getColumnType(table, pColumn) != 4) {
+            apo = "\'";
+        } else {
+            apo = "";
+        }
+        System.out.println("SELECT * FROM " + table + " WHERE " + pColumn + " = " + apo + ID + apo);
+        try (PreparedStatement preparedStatement = SQLcon.prepareStatement("SELECT * FROM " + table + " WHERE " + pColumn + " = " + apo + ID + apo)) {
             //preparedStatement.setString(1, ID);
             try (ResultSet result = preparedStatement.executeQuery()) {
                 if (result.next()) { //Present. Return false.
@@ -168,8 +182,9 @@ public class DBcontroller {
         return true;
     }
 
+
     //Return the data type of column
-    public static int typeOf(String table, String column) {
+    public static int getColumnType(String table, String column) {
         try (ResultSet result = SQLcon.prepareStatement("SELECT " + column + " FROM " + table + " WHERE 1 = 0").executeQuery()) {
             return result.getMetaData().getColumnType(1);
         } catch (SQLException e) {
@@ -177,7 +192,8 @@ public class DBcontroller {
         }
     }
 
-    //Get highest ID
+
+    //Get the highest ID
     public static double highestID(String table, String pColumn) {
         try (ResultSet result = SQLcon.prepareStatement("SELECT MAX(" + pColumn + ") AS max_value FROM " + table).executeQuery()) {
             if (result.next()) {
@@ -188,7 +204,6 @@ public class DBcontroller {
         }
         return -1;
     }
-
 }
 
 

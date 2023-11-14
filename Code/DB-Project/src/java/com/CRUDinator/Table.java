@@ -1,41 +1,36 @@
-import javafx.util.Pair;
+package com.CRUDinator;
+import javafx.collections.ObservableList;
 
-import java.sql.SQLException;
 import java.util.*;
 
-//Manages a table's runtime storage. Created as an instance in Controller.java
+//Data manager for each TableView. Created as an instance in TableController.java
 public class Table<T> {
-    private String DBname;
     private String tableName;
-    private ArrayList<Integer> columnTypes = new ArrayList<Integer>(); //columns data types
-    private ArrayList<Integer> columnIDs = new ArrayList<Integer>(); //The ordered IDs of the current view (as primary key may be altered)
-    public ArrayList<String> newRows = new ArrayList<String>(); //Primary key value for new entries Must be iterating for INSERT in save to database.
+    private String[] columnIDs; //Ordered column IDs of the current view (index = position in table, value = ID for hashmap entry/fetch)
+    private ArrayList<Integer> rowIDs = new ArrayList<>(); //Ordered row IDs of the current view (index = position in table, value = ID for hashmap entry/fetch)
+    public ArrayList<String> newRows = new ArrayList<String>(); //ID value for new entries.
     public Map<String, Column> columns  = new HashMap<String, Column>(); //list of columns (key = name (from database), value = column object)
-    //public Map<Integer, String> IDs = new HashMap<>(1); //key = arbuitary value for operation, value = original database key to map onto database.
-    private String PK;
+    private String PK; //Name of primary key column
 
-    public Table(String DBname, String tableName){
-        this.DBname = DBname;
+    //On creation, set table name
+    public Table(String tableName){
         this.tableName = tableName;
     }
     public String getTable() { return this.tableName; }
-    public String getDB() { return this.DBname; }
+    public void setColIDs(ObservableList<String> colList) { columnIDs = colList.toArray(new String[0]);
+        System.out.println(Arrays.toString(columnIDs)); } //When a view is loaded, set ID list
 
     //Column stuff
-    //Initialise columnTypes from imported columns
-    public void colInit(ArrayList<Integer> columnTypes){this.columnTypes = columnTypes; }
-
     //Public Key column name getter + setter
     public void setPK(String PK) { this.PK = PK; }
     public String getPK(){ return this.PK; }
-
-    //columnTypes setter
-    public void typeAdd(int type){ columnTypes.add(type); }
+    public boolean isPresent(String colName) { return columns.containsKey(Arrays.asList(columnIDs).indexOf(colName)); }
 
     //Creates a new column
     public void addColumn(String name) { columns.put(name, new Column(name, 12, true)); } //New column (pass from Table)
-    public void importColumn(String name) { columns.put(name, new Column(name, DBcontroller.typeOf(this.tableName, name), false)); } //Imported column (pass from Controller)
+    public void importColumn(String name) { columns.put(name, new Column(name, DBcontroller.getColumnType(this.tableName, name), false)); } //Imported column (pass from Controller)
     public void setColumnName(String ID, String newName) { columns.get(ID).setName(newName); }
+    public int getType(String colName) { return columns.get(colName).getType(); }
 
 
     //Add row, by generating it a new ID
@@ -43,16 +38,15 @@ public class Table<T> {
         boolean newKey = false;
         String ID = "0";
 
-        //Generate a random key until it is not one current present in database
+        //Generate a random key value until it is not one current present in database
         while (!newKey) {
-            //If PK type is string, generate a UUID. Else, generate a random number.
-            //We are assuming of course it is either a String or number. Not strictly true ^^'
-            if (DBcontroller.typeOf(tableName, PK) == 4){
+            if (DBcontroller.getColumnType(tableName, PK) == 4){
                 ID = String.valueOf(Integer.valueOf((int) (Integer.valueOf((ID)) + DBcontroller.highestID(tableName, PK) + 1))); //+1 in case (unlikely) the retrived new highest value is already present
             } else {
                 Random rand = new Random();
                 ID = "newRow" + rand.nextInt(1000); //example: newRow55645.
             }
+            System.out.println("PK:  " + PK);
             newKey=(DBcontroller.checkID(tableName, ID, PK) && !newRows.contains(ID));
         }
         //New key obtained, add to newRows as new ID.
@@ -62,7 +56,6 @@ public class Table<T> {
 
 
     //Adding new entry (row + column intersection)
-    //May recieve either origin ID(string) or registered ID (int)
     //Type is only used if the column has not been established
     public void newEntry(String ID, String value, String columnName) {
         //Check column is present. If not, import. (newly created columns already added)
@@ -70,15 +63,32 @@ public class Table<T> {
             importColumn(columnName);
         }
 
-        //Both row and column are now available. Add entry.
+        //Column is now available. Add entry.
         columns.get(columnName).addEntry(ID, value);
+    }
+    //For invalid entries
+    public void badEntry(String ID, String value, String columnName) {
+        if (!columns.containsKey(columnName)) {
+            importColumn(columnName);
+        }
+
+        //Column is now available. Add entry.
+        columns.get(columnName).badEntry(ID, value);
     }
 
 
     //Check if changes have been made for table (ie, is there any data stored here)
     public boolean isModified() {
         if (newRows.isEmpty() && columns.isEmpty()){ return false; }
-        else { return true;}
+        else { return true; }
+    }
+
+    //Checks if there are invalid entries present
+    public boolean invalidsPresent() {
+        for (Column column : columns.values()) {
+            if (column.hasBadEntries()) { return true; } //Invalid entries found
+        }
+        return false;
     }
 
 
@@ -92,7 +102,7 @@ public class Table<T> {
         //Iterate each column for new columns
         for (Map.Entry<String, Column> column : columns.entrySet()) {
             if (column.getValue().isNew()) {
-                toReturn.append("ALTER TABLE EXAMPLE ADD " + column.getKey() + " varchar(255);");
+                toReturn.append("ALTER TABLE " + tableName + " ADD " + column.getKey() + " varchar(255);");
             }
         }
         return toReturn.toString();
@@ -102,10 +112,11 @@ public class Table<T> {
     //Get INSERT queries
     public String getInserts() {
         StringBuilder toReturn = new StringBuilder(); //Key=row, value =columns
+        String apo = setApo(DBcontroller.getColumnType(tableName, PK));
 
         //For each new row, create an INSERT query to add an ID
         for (String row : newRows) {
-            toReturn.append("INSERT INTO " + tableName + " (" + PK + ") VALUES (" + row + ");"); //Adding the primary column to insert
+            toReturn.append("INSERT INTO " + tableName + " (" + PK + ") VALUES (" + apo + row + apo + ");"); //Adding the primary column to insert
         }
 
         return toReturn.toString();
@@ -119,12 +130,11 @@ public class Table<T> {
 
         //Iterate each column
         for (Map.Entry<String, Column> column : columns.entrySet()) {
-            //If it is a string-type columnm, put appostrophies either side of values
-            if (column.getValue().getType() == 12 || column.getValue().getType() == -15) { apo = "'"; } else { apo = "";}
+            apo = setApo(column.getValue().getType());
 
             //Iterate column's entries
-            Map<String, T> entries  = column.getValue().getEntries();
-            for (Map.Entry<String, T> entry : entries.entrySet()) { //Iterate column's data
+            Map<String, String> entries  = column.getValue().getEntries();
+            for (Map.Entry<String, String> entry : entries.entrySet()) { //Iterate column's data
                 String ID = entry.getKey(); //For readability's sake
                 //If ID is not already present for UPDATED queries, add opening of query
                 if (!toReturnList.containsKey(ID)) { //For pre-existing entries
@@ -136,9 +146,11 @@ public class Table<T> {
             }
         }
 
+        apo = setApo(DBcontroller.getColumnType(tableName, PK));
+
         //Adding tail to UPDATE query (WHERE <primaryKeyColumn> = ID;)
         for  (Map.Entry<String, String> entry : toReturnList.entrySet()) {
-            toReturnList.put(entry.getKey(),  entry.getValue().substring(0, entry.getValue().length() - 1) + " WHERE " + this.PK + " = " + entry.getKey() + ";");
+            toReturnList.put(entry.getKey(),  entry.getValue().substring(0, entry.getValue().length() - 1) + " WHERE " + this.PK + " = " + apo + entry.getKey() + apo + ";");
         }
 
 
@@ -153,6 +165,14 @@ public class Table<T> {
         newRows.clear();
         columns.clear();
         return toReturn;
+    }
+
+
+    //Check column type for if appostrophe is needed in query. Return ' or empty string.
+    private String setApo(int type) {
+        if (type == 1 || type == 12 || type == -15 || type == -16 || type == -19) {
+            return "\'";
+        } else { return "";}
     }
 }
 

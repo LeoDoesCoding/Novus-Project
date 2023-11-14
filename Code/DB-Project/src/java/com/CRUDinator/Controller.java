@@ -1,28 +1,18 @@
+package com.CRUDinator;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
-
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+//Controller for main screen outside of table
 public class Controller {
     @FXML
-    private VBox sidebar;
-
-    @FXML
-    private ToggleButton toggleButton;
-
-    @FXML
-    private Button addColumnButt;
-
-    @FXML
     private ComboBox<String> DBcomboBox;
-
     @FXML
     private TabPane tabPane;
 
@@ -31,9 +21,9 @@ public class Controller {
 
     //Populate combobox with available tables
     public void init() throws SQLException {
-        //Populate combobox
         DBcomboBox.getItems().setAll(DBcontroller.getDatabases());
     }
+
 
     //When "Select database" is clicked, load up the tabs and tables.
     @FXML
@@ -55,7 +45,7 @@ public class Controller {
 
                     //Generate controllers for the tabs
                     TableController tableController = loader.getController();
-                    tableController.updateTableView(DBcomboBox.getValue(), tabName);
+                    tableController.loadTable(tabName);
                     tabContent.setUserData(tableController);
                     tabControllers.put(tab, tableController);
 
@@ -77,25 +67,29 @@ public class Controller {
         ArrayList<TableController> listoTab = new ArrayList<TableController>();
 
         //Iterate each table for changes. If changes are present, ask user if they are sure they want to save
+        StringBuilder alertString = new StringBuilder();
         for(TableController tab : tabControllers.values()) {
             if (tab.isModified()) {
+                //If there is invalid values, show warning popup and cancel action.
+                if(tab.invalidsPresent()) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Unable to save because there are invalid entries present. Please check your tables and amend issues.");
+                    alert.show();
+                    return;
+                }
                 listoTab.add(tab);
+                alertString.append(tab.handler.getTable() + "\n");
             }
         }
 
         //Check if there are any changes. If yes, ask user if they want to save them.
-        if (!listoTab.isEmpty()) {
-            StringBuilder alertString = new StringBuilder();
-            for (TableController tab : listoTab){
-                alertString.append(tab.handler.getTable() + "\n");
-            }
-
+        if (!alertString.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "The following tables have been changed:\n" + alertString + "Are you sure you want to save?");
             alert.getButtonTypes().addAll(ButtonType.CANCEL);
 
             //If user selects YES, save all changes to database.
             alert.showAndWait().ifPresent(buttonType -> {
                 if (buttonType == buttonType.OK) {
+                    System.out.println("They said OKK!");
                     StringBuilder alters = new StringBuilder();
                     StringBuilder inserts = new StringBuilder();
                     StringBuilder updates = new StringBuilder();
@@ -135,6 +129,5 @@ public class Controller {
                 }
             });
         }
-
     }
 }
