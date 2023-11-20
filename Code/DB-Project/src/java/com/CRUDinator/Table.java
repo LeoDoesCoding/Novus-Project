@@ -17,14 +17,14 @@ public class Table<T> {
         this.tableName = tableName;
     }
     public String getTable() { return this.tableName; }
-    public void setColIDs(ObservableList<String> colList) { columnIDs = colList.toArray(new String[0]);
-        System.out.println(Arrays.toString(columnIDs)); } //When a view is loaded, set ID list
+    public void setColIDs(ObservableList<String> colList) { columnIDs = colList.toArray(new String[0]); } //When a view is loaded, set ID list
+
 
     //Column stuff
     //Public Key column name getter + setter
     public void setPK(String PK) { this.PK = PK; }
     public String getPK(){ return this.PK; }
-    public boolean isPresent(String colName) { return columns.containsKey(Arrays.asList(columnIDs).indexOf(colName)); }
+    public boolean isPresent(String colName) { return columns.containsKey(colName); }
 
     //Creates a new column
     public void addColumn(String name) { columns.put(name, new Column(name, 12, true)); } //New column (pass from Table)
@@ -90,7 +90,6 @@ public class Table<T> {
         }
         return false;
     }
-
 
 
 
