@@ -11,10 +11,8 @@ import java.util.HashMap;
 
 //Controller for main screen outside of table
 public class Controller {
-    @FXML
-    private ComboBox<String> DBcomboBox;
-    @FXML
-    private TabPane tabPane;
+    @FXML private ComboBox<String> DBcomboBox;
+    @FXML private TabPane tabPane;
 
     //To access the tab's controllers (to save everything to database)
     private HashMap<Tab, TableController> tabControllers = new HashMap<>();
@@ -25,45 +23,49 @@ public class Controller {
     }
 
 
-    //When "Select database" is clicked, load up the tabs and tables.
-    @FXML
-    private void selectDatabase() throws SQLException {
+    //When "Select database" is clicked, get database name and run loadTables
+    //This is seperated from loadTables in order to pass the database automatically when taking a debug route (see: View.java).
+    @FXML private void selectDatabase() throws SQLException {
         //If a valid table is selected, load it and load tab names
         if (!DBcomboBox.getValue().equals("")) {
             DBcontroller.chooseDatabase(DBcomboBox.getValue()); //Set new connection
-            ArrayList<String> tabList = DBcontroller.getTables(DBcomboBox.getValue());
+            loadTables(DBcomboBox.getValue());
+        }
+    }
 
-            //For each table, create a tab and a TableView
-            for(String tabName : tabList) {
-                //Create empty tab
-                Tab tab = new Tab(tabName);
+    //Load table from provided database name as string
+    public void loadTables (String DB) throws SQLException{
+        ArrayList<String> tabList = DBcontroller.getTables(DB);
 
-                // Load content into the tab dynamically
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("tableContent.fxml"));
-                try {
-                    AnchorPane tabContent = loader.load();
+        //For each table, create a tab and a TableView
+        for(String tabName : tabList) {
+            //Create empty tab
+            Tab tab = new Tab(tabName);
 
-                    //Generate controllers for the tabs
-                    TableController tableController = loader.getController();
-                    tableController.loadTable(tabName);
-                    tabContent.setUserData(tableController);
-                    tabControllers.put(tab, tableController);
+            // Load content into the tab dynamically
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("tableContent.fxml"));
+            try {
+                AnchorPane tabContent = loader.load();
 
-                    //Put content in tab
-                    tab.setContent(tabContent);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                //Generate controllers for the tabs
+                TableController tableController = loader.getController();
+                tableController.loadTable(tabName);
+                tabContent.setUserData(tableController);
+                tabControllers.put(tab, tableController);
 
-                tabPane.getTabs().add(tab);
+                //Put content in tab
+                tab.setContent(tabContent);
+            } catch (SQLException | IOException e) {
+                throw new RuntimeException(e);
             }
+
+            tabPane.getTabs().add(tab);
         }
     }
 
 
     //When "save to database" is clicked, save all table data to database
-    @FXML
-    private void saveToDatabase() {
+    @FXML private void saveToDatabase() {
         ArrayList<TableController> listoTab = new ArrayList<TableController>();
 
         //Iterate each table for changes. If changes are present, ask user if they are sure they want to save
@@ -72,7 +74,7 @@ public class Controller {
             if (tab.isModified()) {
                 //If there is invalid values, show warning popup and cancel action.
                 if(tab.invalidsPresent()) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Unable to save because there are invalid entries present. Please check your tables and amend issues.");
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Unable to save because there are invalid entries present. \nPlease check your tables and amend issues.");
                     alert.show();
                     return;
                 }

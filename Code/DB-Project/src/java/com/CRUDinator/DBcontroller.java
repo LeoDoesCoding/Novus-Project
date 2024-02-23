@@ -7,10 +7,10 @@ import java.util.ArrayList;
 
 //Manages the SQL connection and ferries queries
 public class DBcontroller {
-    static protected Connection SQLcon;
-    static protected String url;
-    static protected String user;
-    static protected String pass;
+    static private Connection SQLcon;
+    static private String url;
+    static private String user;
+    static private String pass;
 
     //DEBUG logs in
     static void autoLogin(String DB) throws SQLException {
@@ -159,27 +159,27 @@ public class DBcontroller {
     }
 
 
-    //Check if passed key is present. If it is not, return true (counter intuitive, I know)
-    public static boolean checkID(String table, String ID, String pColumn) {
+    //Check if passed key is present. If it is, return true.
+    public static boolean isIDPresent(String table, String ID, String pColumn) {
         String apo;
         if (getColumnType(table, pColumn) != 4) {
             apo = "\'";
         } else {
             apo = "";
         }
+
         System.out.println("SELECT * FROM " + table + " WHERE " + pColumn + " = " + apo + ID + apo);
         try (PreparedStatement preparedStatement = SQLcon.prepareStatement("SELECT * FROM " + table + " WHERE " + pColumn + " = " + apo + ID + apo)) {
-            //preparedStatement.setString(1, ID);
             try (ResultSet result = preparedStatement.executeQuery()) {
-                if (result.next()) { //Present. Return false.
-                    return false;
+                if (result.next()) { //Present. Return true.
+                    return true;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace(); // Handle the exception according to your application's requirements
         }
-        //Not present. Return true.
-        return true;
+        //Not present. Return false.
+        return false;
     }
 
 
@@ -187,6 +187,24 @@ public class DBcontroller {
     public static int getColumnType(String table, String column) {
         try (ResultSet result = SQLcon.prepareStatement("SELECT " + column + " FROM " + table + " WHERE 1 = 0").executeQuery()) {
             return result.getMetaData().getColumnType(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //Return the scale of the column
+    public static int getScale(String table, String column) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT " + column + " FROM " + table + " WHERE 1 = 0").executeQuery()) {
+            return result.getMetaData().getScale(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //Return the precision of the column
+    public static int getPrecision(String table, String column) {
+        try (ResultSet result = SQLcon.prepareStatement("SELECT " + column + " FROM " + table + " WHERE 1 = 0").executeQuery()) {
+            return result.getMetaData().getPrecision(1);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

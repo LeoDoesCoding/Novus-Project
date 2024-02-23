@@ -27,7 +27,7 @@
             <children>
                 <Label text="Currently in database:" />
                 <Button mnemonicParsing="false" text="Select Database" onAction="#selectDatabase" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <!--Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" /-->
+                <Label text="As user:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
                 <ComboBox fx:id="DBcomboBox" prefHeight="25.0" prefWidth="333.0" GridPane.rowIndex="1" />
                 <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Save Data" onAction="#saveToDatabase" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             </children>

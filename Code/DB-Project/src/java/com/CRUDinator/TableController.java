@@ -17,9 +17,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //Controller for each TableView
 public class TableController {
     @FXML private TableView<ObservableList<String>> tableView;
-    private Scanner myscanner = new Scanner(System.in);
+
+    //Used for managing cell reload actions
+    public enum Reload {
+        FALSE, STYLE, ALL;
+    }
 
     protected Table handler; //Table object, handles once instance of a table.
+    Reload reloadReady = Reload.FALSE;
 
 
     //Adds new (blank) column
@@ -53,17 +58,13 @@ public class TableController {
         }
 
         //Entries into table
-        System.out.println("Get DB entries. . . ");
         tableView.getItems().addAll(DBcontroller.getEntries(handler.getTable()));
     }
 
 
-
     //Adds column (called by loadTable and addColumn)
     private void addColumnHandler(String name) throws SQLException {
-        final String[] debug = new String[1];
         int finalIdx = tableView.getColumns().size();
-        AtomicBoolean reloadReady = new AtomicBoolean(false);
         TableColumn<ObservableList<String>, String> column = new TableColumn<>(name);
         column.setPrefWidth(100);
 
@@ -76,18 +77,40 @@ public class TableController {
 
         //When cell is updated, validate it
         column.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()) {
+
+            //If old ID (imported or generated) is not stored, store it before edits are made.
+            @Override
+            public void startEdit() {
+                handler.storeRowID(getTableRow().getIndex(), getTableRow().getItem().get(0));
+                super.startEdit();
+            }
+
             @Override public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
 
-                if (reloadReady.get()) {
-                    if (isValid(item, column.getText())) { // Valid entry
-                        handler.newEntry(getTableRow().getItem().get(0), item, column.getText());
+                //Check if style and/or data needs updating
+                if (reloadReady != Reload.FALSE) {
+                    if (isValid(item, tableView.getColumns().indexOf(column))) { // Valid entry
+                        //If it was formally invalid, decrease bad entry counter.
+                        if (getStyle().contains("-fx-border-color: red")) {
+                            handler.badCounter -= 1;
+                        }
+
+                        //If reload is for data update too, store data.
+                        if (reloadReady == Reload.ALL) {
+                            handler.newEntry(getTableRow().getIndex(), item, tableView.getColumns().indexOf(column));
+                        }
                         setStyle("-fx-border-color: #EDEDED; -fx-border-width: 1;");
-                    } else { // Invalid entry
-                        handler.badEntry(getTableRow().getItem().get(0), item, column.getText());
+
+                    } else { // Invalid entry. Save to badEntry list.
+                        //If it was formally valid, increase bad entry counter.
+                        if (getStyle() == "" || getStyle().contains("-fx-border-color: #EDEDED")) {
+                            handler.badCounter += 1;
+                        }
                         setStyle("-fx-border-color: red; -fx-border-width: 2;");
                     }
-                    reloadReady.set(false);
+
+                    reloadReady = Reload.FALSE;
                 }
             }
         });
@@ -99,7 +122,7 @@ public class TableController {
         column.setOnEditCommit(event -> {
             ObservableList<String> rowData = event.getTableView().getItems().get(event.getTablePosition().getRow());
             rowData.set(finalIdx, event.getNewValue());
-            reloadReady.set(true);
+            reloadReady = Reload.ALL;
         });
 
         tableView.getColumns().add(column);
@@ -116,38 +139,40 @@ public class TableController {
         }
 
         tableView.getItems().add(emptyRow);
-        String ID = handler.addRow(); //Add row with arbuitary value as key.
+        String ID = handler.newRow(tableView.getItems().size()-1); //Add row with generated ID
 
         //Add primary key (by iterating tableView's columns)
-        for (TableColumn<ObservableList<String>, ?> column : tableView.getColumns()) { //Javafx kinda sucks
+        for (TableColumn<ObservableList<String>, ?> column : tableView.getColumns()) {
             if (column.getText().equals(handler.getPK())) {
                 emptyRow.set(tableView.getColumns().indexOf(column), ID);
+                reloadReady = Reload.STYLE; //Update style (not data, otherwise it counts the ID as having been modified)
             }
         }
     }
 
 
     //Checks entry and if it is valid according to column rules
-    public boolean isValid(String data, String colName) {
-        //Get column type (either by hanlder if stored, or by database)
-        int type;
-        if (handler.isPresent(colName)) {
-            type = handler.getType(colName);
-            //System.out.println(tableView.getColumns().get(colInd).getText());
-        } else {
-            type = DBcontroller.getColumnType(handler.getTable(), colName);
-        }
+    public boolean isValid(String data, int colID) {
+        //Get column type
+        int type = handler.getType(colID);
+        System.out.println("Type:" + type + " precision: " + handler.getPrecision(colID) + " scale: " + handler.getScale(colID));
 
         //Check column type against value entered
         switch (type) {
-            case -15: //Is Big Int
+            case -6: //Is Tiny Int
+                try {
+                    Byte.parseByte(data);
+                } catch (NumberFormatException e) {
+                    return false; //Invalid input
+                } break;
+            case -5: //Is Big Int
                 try { Long.parseLong(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
                 } break;
             case 3: //Is Decimal
                 try { BigDecimal check = new BigDecimal(data); //Convert to decimal
-                if (check.toString() != data) { return false; } //Check if it is the same
+                if (!check.toString().equals(data)) { return false; } //Check if it is the same
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
                 } break;
@@ -162,13 +187,20 @@ public class TableController {
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
                 } break;
-            case 7: //Is Double
-                try { Double.parseDouble(data);
+            case 7: //Is Real
+                try { Float.parseFloat(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
                 } break;
-            default:
+            case 1: //Is Char
+            case 12: //Is varchar
+            case -15: //Is Nchar
+            case -9: //Is Nvarchar
+                //The check for char, varchar, nchar and nvarchar is the same. Char length is padded when as a query.
+                handler.getPrecision(colID);
+                if (data.length() > handler.getPrecision(colID)) { return false; } //Invalid input
                 break;
+            default:
         }
         return true;
     }
@@ -177,7 +209,7 @@ public class TableController {
     //TABLE METHODS
     //Check for changes to table
     public boolean isModified() {
-        if (handler.isModified()) {
+        if (handler.isModified() || handler.badCounter != 0) {
             return true;
         } else {
             return false;
@@ -185,7 +217,7 @@ public class TableController {
     }
 
     public boolean invalidsPresent() {
-        if (handler.invalidsPresent()) {
+        if (handler.badCounter != 0) {
             return true;
         } else {
             return false;

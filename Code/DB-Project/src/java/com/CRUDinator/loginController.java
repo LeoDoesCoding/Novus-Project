@@ -10,16 +10,11 @@ import java.util.concurrent.CompletableFuture;
 
 //Controller for login screen
 public class loginController {
-    @FXML
-    private TextField URLField;
-    @FXML
-    private TextField userField;
-    @FXML
-    private TextField passField;
-    @FXML
-    private Button loginButt;
-    @FXML
-    private Label status;
+    @FXML private TextField URLField;
+    @FXML private TextField userField;
+    @FXML private TextField passField;
+    @FXML private Button loginButt;
+    @FXML private Label status;
 
     private Runnable login;
 
@@ -31,8 +26,7 @@ public class loginController {
 
 
     //Button clicked, attempt login
-    @FXML
-    private void loginAttempt() {
+    @FXML private void loginAttempt() {
         //Disable stuff while a login is attempted
         loginButt.setDisable(true);
         URLField.setDisable(true);

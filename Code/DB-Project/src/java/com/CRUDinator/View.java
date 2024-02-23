@@ -16,25 +16,23 @@ public class View extends Application {
         launch(args);
     }
 
-    @Override
-    public void start(Stage primaryStage) throws SQLException, IOException {
-        //debugger(primaryStage); //DEBUG autologin
-        real(primaryStage); //Login
+    @Override public void start(Stage primaryStage) throws SQLException, IOException {
+        //debugger(primaryStage); //Debbuger autologin. Bypasses login and database load (custom set). NOTE: change the controller in MainView.fxml and comment out the "select database" button.
+        real(primaryStage); //Login NOTE: change the controller in MainView.fxml and remove comment marking from "select database" button.
     }
 
 
     //DEBUG Automatically logs in and loads DB
     public void debugger(Stage primaryStage) throws IOException {
         try {
-            FXMLLoader mainLoader = new FXMLLoader(getClass().getResource("MainView.fxml"));
-            Parent mainRoot = mainLoader.load();
-            AUTOController mainController = mainLoader.getController();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+            Parent root = loader.load();
+            Controller mainController = loader.getController();
             DBcontroller.autoLogin("DemoDB");
             mainController.loadTables("DemoDB");
 
             //Load MainView
-            Scene mainScene = new Scene(mainRoot, 800, 500);
-            mainScene.getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+            Scene mainScene = new Scene(root, 800, 500);
             primaryStage.setResizable(true);
             primaryStage.setScene(mainScene);
             primaryStage.setTitle("CRUDinator");
