@@ -13,7 +13,6 @@ public class Table {
     public List<String> newRows = new ArrayList<>(); //ID value for new entries.
     public Map<String, Column> columns  = new HashMap<>(); //list of columns (key = name (from database), value = column object)
     //Note: Column name changes are stored as a string in a Column object. Key will ALWAYS be DB or generated name.
-    //To get column from columns at a given index, use "columns.get(columnIDs.get(colID))"
     private String PK; //Name of primary key column
 
 
@@ -42,7 +41,6 @@ public class Table {
     public void storeRowID(int rowInd, String ID) {
         //If the index is not already stored, add the new index and ID.
         if (!rowIDs.containsKey(rowInd)) {
-            System.out.println("Row ID new to handler. Let's store.");
             rowIDs.put(rowInd, ID);
         }
     }
@@ -107,9 +105,6 @@ public class Table {
         //TODO: Take into consideration renamed IDs.
         } while (DBcontroller.isIDPresent(tableName, ID, PK) || rowIDs.containsValue(ID));
 
-        System.out.println("Row ID added.");
-        System.out.println(rowIDs);
-
         //New key obtained, add to newRows as new ID.
         newRows.add(ID);
         rowIDs.put(rowInd, ID);
@@ -168,8 +163,6 @@ public class Table {
 
     //get UPDATE queries
     public String getUpdates() {
-        System.out.println(rowIDs);
-        System.out.println(columns);
         String apo;
         HashMap<String, String> toReturnList = new HashMap<>(); //Key=entryID, value="UPDATE _ SET" (append "WHERE" at end of looping
 

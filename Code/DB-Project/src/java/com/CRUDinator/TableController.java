@@ -151,6 +151,7 @@ public class TableController {
     }
 
 
+    //ENTRY VALIDATION
     //Checks entry and if it is valid according to column rules
     public boolean isValid(String data, int colID) {
         //Get column type
@@ -164,34 +165,58 @@ public class TableController {
                     Byte.parseByte(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
-                } break;
+                }
+                //Check precision and scale
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                break;
             case -5: //Is Big Int
                 try { Long.parseLong(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
-                } break;
+                }
+                //Check precision and scale
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                break;
+            case 2:
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                break;
             case 3: //Is Decimal
                 try { BigDecimal check = new BigDecimal(data); //Convert to decimal
                 if (!check.toString().equals(data)) { return false; } //Check if it is the same
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
-                } break;
+                }
+                //Check precision and scale
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                if (!numericalScale(data, colID)) { return false; }
+                break;
             case 4: //Is Integer
                 try { Integer.parseInt(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
-                } break;
+                }
+                //Check precision and scale
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                break;
             case 6: //Is Float (passed as double)
             case 8: //Is Double
                 try { Double.parseDouble(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
-                } break;
+                }
+                //Check precision and scale
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                if (!numericalScale(data, colID)) { return false; }
+                break;
             case 7: //Is Real
                 try { Float.parseFloat(data);
                 } catch (NumberFormatException e) {
                     return false; //Invalid input
-                } break;
+                }
+                //Check precision and scale
+                if (!numericalPrec(Double.valueOf(data), colID)) { return false; }
+                if (!numericalScale(data, colID)) { return false; }
+                break;
             case 1: //Is Char
             case 12: //Is varchar
             case -15: //Is Nchar
@@ -204,6 +229,19 @@ public class TableController {
         }
         return true;
     }
+
+    //Check precision of a numerical value
+    public boolean numericalPrec(double data, int colID) {
+        System.out.println(Double.toString(Math.abs(data)).replace(".", "").length() + " Prec: " + handler.getPrecision(colID));
+        return Double.toString(Math.abs(data)).replace(".", "").length() <= handler.getPrecision(colID);
+    }
+
+    //Check scale of a numerical value
+    public boolean numericalScale(String data, int colID) {
+        System.out.println(Integer.valueOf(data.substring(data.lastIndexOf(".") + 1).length()) + " Scale: " + handler.getScale(colID));
+        return Integer.valueOf(data.substring(data.lastIndexOf(".") + 1).length()) <= handler.getScale(colID);
+    }
+
 
 
     //TABLE METHODS

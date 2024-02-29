@@ -17,8 +17,8 @@ public class View extends Application {
     }
 
     @Override public void start(Stage primaryStage) throws SQLException, IOException {
-        //debugger(primaryStage); //Debbuger autologin. Bypasses login and database load (custom set). NOTE: change the controller in MainView.fxml and comment out the "select database" button.
-        real(primaryStage); //Login NOTE: change the controller in MainView.fxml and remove comment marking from "select database" button.
+        debugger(primaryStage); //Debbuger autologin. Bypasses login and database load (custom set). NOTE: change the controller in MainView.fxml and comment out the "select database" button.
+        //real(primaryStage); //Login NOTE: change the controller in MainView.fxml and remove comment marking from "select database" button.
     }
 
 
